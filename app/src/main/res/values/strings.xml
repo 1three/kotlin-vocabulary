@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">vocabulary</string>
+    <string name="title_addWord">단어 추가</string>
+    <string name="hint_inputWord">단어를 입력해주세요.</string>
+    <string name="hint_inputMean">뜻을 입력해주세요.</string>
+    <string name="button_add">추가하기</string>
+</resources>
