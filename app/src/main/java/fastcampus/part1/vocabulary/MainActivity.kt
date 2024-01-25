@@ -1,5 +1,6 @@
 package fastcampus.part1.vocabulary
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -23,7 +24,7 @@ import fastcampus.part1.vocabulary.databinding.ActivityMainBinding
  * Barrier
  * */
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), WordApater.ItemClickListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var wordAdapter: WordApater
 
@@ -32,13 +33,23 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        initRecyclerView()
+
+        binding.addButton.setOnClickListener {
+            Intent(this, AddActivity::class.java).let {
+                startActivity(it)
+            }
+        }
+    }
+
+    private fun initRecyclerView() {
         val dummyList = mutableListOf<Word>(
             Word("Weather", "날씨", "명사"),
             Word("Honey", "꿀", "명사"),
             Word("Run", "실행하다", "동사")
         )
 
-        wordAdapter = WordApater(dummyList)
+        wordAdapter = WordApater(dummyList, this)
         binding.wordRecyclerView.apply {
             adapter = wordAdapter // RecyclerView - Adapter 연결
             layoutManager =
@@ -53,5 +64,9 @@ class MainActivity : AppCompatActivity() {
                 DividerItemDecoration(applicationContext, LinearLayoutManager.VERTICAL)
             addItemDecoration(dividerItemDecoration)
         }
+    }
+
+    override fun onClick(word: Word) {
+
     }
 }

@@ -3,6 +3,7 @@ package fastcampus.part1.vocabulary
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.AdapterView.OnItemClickListener
 import androidx.recyclerview.widget.RecyclerView
 import fastcampus.part1.vocabulary.databinding.ItemWordBinding
 
@@ -11,7 +12,10 @@ import fastcampus.part1.vocabulary.databinding.ItemWordBinding
  * Adpater
  * Data Collection이 필요
  * */
-class WordApater(private val list: MutableList<Word>) :
+class WordApater(
+    private val list: MutableList<Word>,
+    private val itemClickListener: ItemClickListener? = null
+) :
     RecyclerView.Adapter<WordApater.WordViewHolder>() {
 
     /**
@@ -28,9 +32,12 @@ class WordApater(private val list: MutableList<Word>) :
     /**
      * onBindViewHolder
      * UI - Data 연결
+     * ClickListener
      * */
     override fun onBindViewHolder(holder: WordViewHolder, position: Int) {
-        holder.bind(list[position])
+        val word = list[position]
+        holder.bind(word)
+        holder.itemView.setOnClickListener { itemClickListener?.onClick(word) }
     }
 
     /**
@@ -45,7 +52,8 @@ class WordApater(private val list: MutableList<Word>) :
      * ViewHolder
      * 화면에 그려질 View 보유
      * */
-    class WordViewHolder(private val binding: ItemWordBinding) : RecyclerView.ViewHolder(binding.root) {
+    class WordViewHolder(private val binding: ItemWordBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(word: Word) {
             binding.apply {
                 wordTextView.text = word.word
@@ -53,5 +61,9 @@ class WordApater(private val list: MutableList<Word>) :
                 typeChip.text = word.type
             }
         }
+    }
+
+    interface ItemClickListener {
+        fun onClick(word: Word)
     }
 }
