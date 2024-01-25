@@ -30,12 +30,7 @@ class WordApater(private val list: MutableList<Word>) :
      * UI - Data 연결
      * */
     override fun onBindViewHolder(holder: WordViewHolder, position: Int) {
-        holder.binding.apply {
-            val word = list[position]
-            wordTextView.text = word.word
-            meanTextView.text = word.mean
-            typeChip.text = word.type
-        }
+        holder.bind(list[position])
     }
 
     /**
@@ -50,7 +45,13 @@ class WordApater(private val list: MutableList<Word>) :
      * ViewHolder
      * 화면에 그려질 View 보유
      * */
-    class WordViewHolder(val binding: ItemWordBinding) : RecyclerView.ViewHolder(binding.root) {
-
+    class WordViewHolder(private val binding: ItemWordBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(word: Word) {
+            binding.apply {
+                wordTextView.text = word.word
+                meanTextView.text = word.mean
+                typeChip.text = word.type
+            }
+        }
     }
 }
