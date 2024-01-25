@@ -1,7 +1,9 @@
 package fastcampus.part1.vocabulary
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import com.google.android.material.chip.Chip
 import fastcampus.part1.vocabulary.databinding.ActivityAddBinding
 
@@ -13,6 +15,9 @@ class AddActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         initViews()
+        binding.addButton.setOnClickListener {
+            addItem()
+        }
     }
 
     private fun initViews() {
@@ -34,5 +39,23 @@ class AddActivity : AppCompatActivity() {
             isCheckable = true
             isClickable = true
         }
+    }
+
+    private fun addItem() {
+        val word = binding.wordInputEditText.text.toString()
+        val mean = binding.meanInputEditText.text.toString()
+        val type = findViewById<Chip>(binding.typeChipGroup.checkedChipId).text.toString()
+        val item = Word(word, mean, type)
+
+        Thread {
+            AppDatabase.getInstance(this)?.wordDao()?.insertItem(item)
+            runOnUiThread {
+                Toast.makeText(this, "저장되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+
+            val intent = Intent().putExtra("isUpdated", true)
+            setResult(RESULT_OK, intent) // ↔️ registerForActivityResult(Main)
+            finish()
+        }.start()
     }
 }

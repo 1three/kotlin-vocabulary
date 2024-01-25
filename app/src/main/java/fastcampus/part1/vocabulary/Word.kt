@@ -1,5 +1,8 @@
 package fastcampus.part1.vocabulary
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
 /**
  * data class
  *
@@ -8,8 +11,11 @@ package fastcampus.part1.vocabulary
  * 3. 상속 불가
  * 4. toString, hashCode,equals 등 기본적으로 선언된 상태
  * */
+
+@Entity(tableName = "word")
 data class Word(
     val word: String,
     val mean: String,
-    val type: String
+    val type: String,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
 )

@@ -13,7 +13,7 @@ import fastcampus.part1.vocabulary.databinding.ItemWordBinding
  * Data Collection이 필요
  * */
 class WordApater(
-    private val list: MutableList<Word>,
+    val list: MutableList<Word>,
     private val itemClickListener: ItemClickListener? = null
 ) :
     RecyclerView.Adapter<WordApater.WordViewHolder>() {
