@@ -30,15 +30,24 @@ class MainActivity : AppCompatActivity(), WordApater.ItemClickListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var wordAdapter: WordApater
     private var selectedWord: Word? = null
-    private val updateWordListResult =
+    private val updateAddWordResult =
+        // registerForActivityResult (Activity 결과를 listen) ↔️ setResult (Add)
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val isUpdated = result.data?.getBooleanExtra("isUpdated", false) ?: false
 
             if (result.resultCode == RESULT_OK && isUpdated) {
-                updateWordList()
+                updateAddWord()
             }
         }
-    // registerForActivityResult (Activity 결과를 listen) ↔️ setResult (Add)
+    private val updateEditWordResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val editWord = result.data?.getParcelableExtra<Word>("editWord")
+
+            if (result.resultCode == RESULT_OK && editWord != null) {
+                updateEditWord(editWord)
+            }
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,13 +57,17 @@ class MainActivity : AppCompatActivity(), WordApater.ItemClickListener {
         initRecyclerView()
 
         binding.addButton.setOnClickListener {
-            Intent(this, AddActivity::class.java).let {
-                updateWordListResult.launch(it)
+            Intent(this, AddEditActivity::class.java).let {
+                updateAddWordResult.launch(it)
             }
         }
 
         binding.deleteButton.setOnClickListener {
             deleteItem()
+        }
+
+        binding.editButton.setOnClickListener {
+            editItem()
         }
     }
 
@@ -85,7 +98,7 @@ class MainActivity : AppCompatActivity(), WordApater.ItemClickListener {
         }.start()
     }
 
-    private fun updateWordList() {
+    private fun updateAddWord() {
         Thread {
             AppDatabase.getInstance(this)?.wordDao()?.getLatestItem()?.let { word ->
                 wordAdapter.list.add(0, word)
@@ -94,6 +107,17 @@ class MainActivity : AppCompatActivity(), WordApater.ItemClickListener {
                 }
             }
         }.start()
+    }
+
+    private fun updateEditWord(word: Word) {
+        val index = wordAdapter.list.indexOfFirst { it.id == word.id }
+        wordAdapter.list[index] = word
+        runOnUiThread {
+            selectedWord = word
+            wordAdapter.notifyItemChanged(index)
+            binding.wordTextView.text = word.word
+            binding.meanTextView.text = word.mean
+        }
     }
 
     private fun deleteItem() {
@@ -114,6 +138,16 @@ class MainActivity : AppCompatActivity(), WordApater.ItemClickListener {
                 }
             }
         }.start()
+    }
+
+    private fun editItem() {
+        if (selectedWord == null) {
+            Toast.makeText(this, "수정할 단어를 선택해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val intent = Intent(this, AddEditActivity::class.java).putExtra("originWord", selectedWord)
+        updateEditWordResult.launch(intent)
     }
 
     override fun onClick(word: Word) {
