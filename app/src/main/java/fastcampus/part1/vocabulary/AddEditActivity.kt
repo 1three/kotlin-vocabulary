@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.core.view.children
+import androidx.core.widget.addTextChangedListener
 import com.google.android.material.chip.Chip
 import fastcampus.part1.vocabulary.databinding.ActivityAddEditBinding
 
@@ -46,6 +47,22 @@ class AddEditActivity : AppCompatActivity() {
             } as? Chip
             selectedChip?.isChecked = true
         }
+
+        binding.wordInputEditText.addTextChangedListener {
+            it?.let {text ->
+                binding.wordInputEditText.error = when(text.length) {
+                    0 -> "값을 입력해주세요."
+                    1 -> "2자 이상 입력해주세요."
+                    else -> null // error = null, 정상 취급
+                }
+            }
+        }
+
+        binding.meanInputEditText.addTextChangedListener {
+            it?.let {text ->
+                binding.meanInputEditText.error = if (text.isEmpty()) "값을 입력해주세요." else null
+            }
+        }
     }
 
     private fun createChip(text: String): Chip {
@@ -61,9 +78,7 @@ class AddEditActivity : AppCompatActivity() {
     }
 
     private fun addItem() {
-        val word = binding.wordInputEditText.text.toString()
-        val mean = binding.meanInputEditText.text.toString()
-        val type = findViewById<Chip>(binding.typeChipGroup.checkedChipId).text.toString()
+        val (word, mean, type) = getValidatedInputs() ?: return
         val item = Word(word, mean, type)
 
         Thread {
@@ -79,9 +94,7 @@ class AddEditActivity : AppCompatActivity() {
     }
 
     private fun editItem() {
-        val word = binding.wordInputEditText.text.toString()
-        val mean = binding.meanInputEditText.text.toString()
-        val type = findViewById<Chip>(binding.typeChipGroup.checkedChipId).text.toString()
+        val (word, mean, type) = getValidatedInputs() ?: return
         val editItem = originWord?.copy(word = word, mean = mean, type = type)
 
         Thread {
@@ -95,5 +108,27 @@ class AddEditActivity : AppCompatActivity() {
                 finish()
             }
         }.start()
+    }
+
+    private fun getValidatedInputs(): Triple<String, String, String>? {
+        val word = binding.wordInputEditText.text.toString()
+        val mean = binding.meanInputEditText.text.toString()
+        val typeChipId = binding.typeChipGroup.checkedChipId
+
+        if (word.isEmpty()) {
+            Toast.makeText(this, "단어를 입력해주세요.", Toast.LENGTH_SHORT).show()
+            return null
+        }
+        if (mean.isEmpty()) {
+            Toast.makeText(this, "의미를 입력해주세요.", Toast.LENGTH_SHORT).show()
+            return null
+        }
+        if (typeChipId == -1) {
+            Toast.makeText(this, "단어 유형을 선택해주세요.", Toast.LENGTH_SHORT).show()
+            return null
+        }
+        val type = findViewById<Chip>(typeChipId).text.toString()
+
+        return Triple(word, mean, type)
     }
 }
