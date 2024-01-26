@@ -6,10 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 
-/**
- * AppDatabase
- * Room DB 생성, 관리를 위한 싱글톤 패턴을 구현한 클래스
- * */
+// AppDatabase : Room DB 생성, 관리를 위한 싱글톤 패턴을 구현한 클래스
 @Database(entities = [Word::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun wordDao(): WordDao

@@ -50,7 +50,7 @@ class AddActivity : AppCompatActivity() {
         Thread {
             AppDatabase.getInstance(this)?.wordDao()?.insertItem(item)
             runOnUiThread {
-                Toast.makeText(this, "저장되었습니다.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "단어가 저장되었습니다.", Toast.LENGTH_SHORT).show()
             }
 
             val intent = Intent().putExtra("isUpdated", true)

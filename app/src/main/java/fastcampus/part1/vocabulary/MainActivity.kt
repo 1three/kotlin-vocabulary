@@ -29,12 +29,13 @@ import fastcampus.part1.vocabulary.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity(), WordApater.ItemClickListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var wordAdapter: WordApater
-    private val updateAddWordResult =
+    private var selectedWord: Word? = null
+    private val updateWordListResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val isUpdated = result.data?.getBooleanExtra("isUpdated", false) ?: false
 
             if (result.resultCode == RESULT_OK && isUpdated) {
-                updateAddWord()
+                updateWordList()
             }
         }
     // registerForActivityResult (Activity 결과를 listen) ↔️ setResult (Add)
@@ -45,10 +46,15 @@ class MainActivity : AppCompatActivity(), WordApater.ItemClickListener {
         setContentView(binding.root)
 
         initRecyclerView()
+
         binding.addButton.setOnClickListener {
             Intent(this, AddActivity::class.java).let {
-                updateAddWordResult.launch(it)
+                updateWordListResult.launch(it)
             }
+        }
+
+        binding.deleteButton.setOnClickListener {
+            deleteItem()
         }
     }
 
@@ -79,7 +85,7 @@ class MainActivity : AppCompatActivity(), WordApater.ItemClickListener {
         }.start()
     }
 
-    private fun updateAddWord() {
+    private fun updateWordList() {
         Thread {
             AppDatabase.getInstance(this)?.wordDao()?.getLatestItem()?.let { word ->
                 wordAdapter.list.add(0, word)
@@ -90,7 +96,29 @@ class MainActivity : AppCompatActivity(), WordApater.ItemClickListener {
         }.start()
     }
 
+    private fun deleteItem() {
+        if (selectedWord == null) {
+            Toast.makeText(this, "삭제할 단어를 선택해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        Thread {
+            selectedWord?.let { word ->
+                AppDatabase.getInstance(this)?.wordDao()?.deleteItem(word)
+                runOnUiThread {
+                    wordAdapter.list.remove(word)
+                    wordAdapter.notifyDataSetChanged()
+                    binding.wordTextView.text = ""
+                    binding.meanTextView.text = ""
+                    Toast.makeText(this, "단어가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
+    }
+
     override fun onClick(word: Word) {
-        Toast.makeText(this, "${word.word}를 선택하였습니다.", Toast.LENGTH_SHORT).show()
+        selectedWord = word
+        binding.wordTextView.text = word.word
+        binding.meanTextView.text = word.mean
     }
 }
